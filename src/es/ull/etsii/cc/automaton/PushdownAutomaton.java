@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Stack;
 
@@ -24,9 +25,6 @@ public class PushdownAutomaton {
 	private Tape tape;
 	private Stack<String> stack;
 
-	private final Integer FIRST_TOKEN = 0;
-	private final String COMMENT = "#";
-
 	public PushdownAutomaton() {
 		setOfStates = new ArrayList<>();
 		inputAlphabet = new Alphabet();
@@ -38,30 +36,59 @@ public class PushdownAutomaton {
 	public void loadFileContent(String file) throws IOException {
 		BufferedReader reader = new BufferedReader(new FileReader(file));
 
-		String line = null;
-		String[] tokens;
-		
-		line = reader.readLine();
-		tokens = line.split("//s+");
+		String line = reader.readLine();
+		String[] tokens = line.split("\\s+");
 
-		Boolean flag = true;
-		while (flag) {
-			if (tokens[FIRST_TOKEN] == COMMENT) {
-				line = reader.readLine();
-				tokens = line.split("//s+");
-			} else {
-				flag = false;
-			}
+		// Skip first lines if they are comments
+		while (tokens[0].equals("#")) {
+			line = reader.readLine();
+			tokens = line.split("\\s+");
 		}
 
-		// Read Set of states
+		tokens = line.split("#")[0].split("\\s+"); // Ignore comments in line
+
+		// Here come the set of states so we create it
 		for (String i : tokens) {
 			State state = new State(i);
 			setOfStates.add(state);
 		}
 
-		while ((line = reader.readLine()) != null) {
+		// Read input alphabet and ignore comments
+		line = reader.readLine();
+		tokens = line.split("#")[0].split("\\s+");
 
+		// Create tape alphabet
+		for (String i : tokens) {
+			inputAlphabet.addElement(i);
+		}
+
+		// Read stack alphabet and ignore comments
+		line = reader.readLine();
+		tokens = line.split("#")[0].split("\\s+");
+
+		// Create stack alphabet
+		for (String i : tokens) {
+			stackAlphabet.addElement(i);
+		}
+
+		// Read initial state
+		line = reader.readLine();
+		tokens = line.split("#")[0].split("\\s+");
+
+		setInitialState(new State(tokens[0]));
+
+		// Read initial stack symbol
+		line = reader.readLine();
+		tokens = line.split("#")[0].split("\\s+");
+		
+		setInitialStackSymbol(tokens[0]);
+		
+		// Read transitions and create it
+		while ((line = reader.readLine()) != null) {
+			tokens = line.split("#")[0].split("\\s+");
+			
+			Transition transition = new Transition(new State(tokens[0]), tokens[1], tokens[2], Arrays.copyOfRange(tokens, 3, tokens.length));
+			setOfTransitions.add(transition);			
 		}
 
 		reader.close();
@@ -78,6 +105,27 @@ public class PushdownAutomaton {
 			System.out.print(i.getId() + " ");
 
 		System.out.println();
+
+		System.out.print("Printing input alphabet E: ");
+		for (String i : getInputAlphabet().getElements())
+			System.out.print(i + " ");
+
+		System.out.println();
+
+		System.out.print("Printing stack alphabet P: ");
+		for (String i : getStackAlphabet().getElements())
+			System.out.print(i + " ");
+
+		System.out.println();
+		
+		System.out.println("Printing initial state s: " + getInitialState().getId());
+		
+		System.out.println("Printing initial stack symbol Z: "+ getInitialStackSymbol());
+		
+		System.out.println("Printing transitions d: ");
+		for(Transition i : getSetOfTransitions())
+			System.out.println(i.toString());
+
 	}
 
 	/** Getters and Setters **/

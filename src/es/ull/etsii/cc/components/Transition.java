@@ -19,17 +19,24 @@ public class Transition {
 	 * @param args the the different elements that will be inserted in the stack
 	 */
 	public Transition(State current, String symbol, String stackTop, String ...args) {
-		setCurrentState(current);
-		setSymbol(symbol);
-		setStackTop(stackTop);
-		//setElements(new ArrayList<>());
+		this.currentState = current;
+		this.symbol = symbol;
+		this.stackTop = stackTop;
+		elements = new ArrayList<>();
 		
-		List<String> helper = new ArrayList<>();
 		for (String i : args)
-			helper.add(i);
+			elements.add(i);
 		
-		setElements(helper);
 	}
+	
+	/* (non-Javadoc)
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString() {
+		return currentState.getId() + " " + symbol + " " + stackTop + " " + elements + " ";
+	}
+
 
 	/** Getters and Setters **/
 	

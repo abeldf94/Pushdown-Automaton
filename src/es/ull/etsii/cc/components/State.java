@@ -11,6 +11,8 @@ public class State {
 	public State(String id) {
 		setId(id);
 	}
+	
+	/** Getters and Setters **/
 
 	public String getId() {
 		return id;
