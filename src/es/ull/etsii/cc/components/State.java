@@ -5,11 +5,11 @@ public class State {
 	private String id;
 
 	public State() {
-		setId(null);
+		id = null;
 	}
 
 	public State(String id) {
-		setId(id);
+		this.id = id;
 	}
 	
 	/** Getters and Setters **/

@@ -4,12 +4,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Transition {
-	
+
 	private State currentState;
 	private String symbol;
 	private String stackTop;
+	private State nextState;
 	private List<String> elements;
-	
+
 	/**
 	 * Instantiates a new transition.
 	 *
@@ -18,28 +19,30 @@ public class Transition {
 	 * @param stackTop symbol that must have the top of the stack for this transition
 	 * @param args the the different elements that will be inserted in the stack
 	 */
-	public Transition(State current, String symbol, String stackTop, String ...args) {
+	public Transition(State current, String symbol, String stackTop, State nextState, String... args) {
 		this.currentState = current;
 		this.symbol = symbol;
 		this.stackTop = stackTop;
+		this.nextState = nextState;
 		elements = new ArrayList<>();
-		
+
 		for (String i : args)
 			elements.add(i);
-		
+
 	}
-	
-	/* (non-Javadoc)
+
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see java.lang.Object#toString()
 	 */
 	@Override
 	public String toString() {
-		return currentState.getId() + " " + symbol + " " + stackTop + " " + elements + " ";
+		return currentState.getId() + " " + symbol + " " + stackTop + " " + nextState.getId() + " " + elements + " ";
 	}
 
-
 	/** Getters and Setters **/
-	
+
 	public State getCurrentState() {
 		return currentState;
 	}
@@ -70,5 +73,13 @@ public class Transition {
 
 	public void setElements(List<String> elements) {
 		this.elements = elements;
+	}
+
+	public State getNextState() {
+		return nextState;
+	}
+
+	public void setNextState(State nextState) {
+		this.nextState = nextState;
 	}
 }

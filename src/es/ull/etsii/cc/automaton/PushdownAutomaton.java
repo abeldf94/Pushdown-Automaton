@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Stack;
 
 import es.ull.etsii.cc.components.Alphabet;
+import es.ull.etsii.cc.components.Pair;
 import es.ull.etsii.cc.components.State;
 import es.ull.etsii.cc.components.Tape;
 import es.ull.etsii.cc.components.Transition;
@@ -31,6 +32,9 @@ public class PushdownAutomaton {
 		stackAlphabet = new Alphabet();
 		initialState = new State();
 		setOfTransitions = new ArrayList<>();
+		
+		tape = new Tape();
+		stack = new Stack<>();
 	}
 
 	public void loadFileContent(String file) throws IOException {
@@ -87,17 +91,49 @@ public class PushdownAutomaton {
 		while ((line = reader.readLine()) != null) {
 			tokens = line.split("#")[0].split("\\s+");
 			
-			Transition transition = new Transition(new State(tokens[0]), tokens[1], tokens[2], Arrays.copyOfRange(tokens, 3, tokens.length));
+			Transition transition = new Transition(new State(tokens[0]), tokens[1], tokens[2], new State(tokens[3]), Arrays.copyOfRange(tokens, 4, tokens.length));
 			setOfTransitions.add(transition);			
 		}
 
 		reader.close();
 
-		writeAutomaton();
+		//writeAutomaton();
 	}
 
-	public void computeInput() {
+	public void computeInput(String input) {
+		// Set new input in tape and reset machine
+		tape.resetTape(input);
+		
+		State current = getInitialState();
+		
+		stack.clear();
+		stack.push(getInitialStackSymbol());
+		
+		Stack<Pair> paths = new Stack<>();
+		
+		findTransitions(current, paths);
+		
+		while((!paths.isEmpty()) && (tape.getPointer() != tape.getInput().length())) {
+			System.out.println("tenemos: ");
+			for(Pair i : paths)
+				System.out.println(i.getTransition().toString()+ " en la pos " + i.getPosition());
+			paths.clear();
+		}
+		
 	}
+	
+	private void findTransitions(State current, Stack<Pair> paths) {
+		for (Transition i : getSetOfTransitions()) {
+			// Check if state is the same, if not we wont keep comparing
+			if (current.getId().equals(i.getCurrentState().getId())) { 
+				// If it's same symbol or epsilon
+				if (tape.getCurrentCharacterWithoutMove().equals(i.getSymbol()) || i.getSymbol().equals(".")) {
+					paths.add(new Pair(i, tape.getPointer()));
+				}
+			} 
+		}
+	}
+	
 
 	public void writeAutomaton() {
 		System.out.print("Printing states Q: ");
