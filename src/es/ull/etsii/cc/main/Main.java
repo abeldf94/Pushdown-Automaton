@@ -1,7 +1,6 @@
 package es.ull.etsii.cc.main;
 
 import java.io.BufferedReader;
-import java.io.IOException;
 import java.io.InputStreamReader;
 
 import es.ull.etsii.cc.automaton.PushdownAutomaton;
@@ -29,7 +28,7 @@ public class Main {
 			} while (loop);
 			
 			System.out.println("Shutting down. Bye!");
-		} catch (IOException error) {
+		} catch (Exception error) {
 			System.err.println("Error: " + error.getMessage());
 			error.printStackTrace();
 		}
