@@ -3,6 +3,7 @@ package es.ull.etsii.cc.components;
 public class Tape {
 	private String input;
 	private Integer pointer;
+	private final String EPSILON = ".";
 	
 	public Tape() {
 		input = null;
@@ -21,8 +22,10 @@ public class Tape {
 	}
 	
 	public String getCurrentCharacterWithoutMove() {
-		String result = Character.toString(getInput().charAt(getPointer()));
-		return result;
+		if (getPointer() == getInput().length())
+			return EPSILON;
+		else
+			return Character.toString(getInput().charAt(getPointer()));
 	}
 
 	public String getInput() {
