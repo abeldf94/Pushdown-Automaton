@@ -116,8 +116,10 @@ public class PushdownAutomaton {
 
 		findTransitions(current, paths);
 
-		while (!stack.isEmpty() && !paths.isEmpty()) {
-			// TODO: fix if input could take epsilon without consume entry
+		boolean accepted = true;
+		
+		while (!paths.isEmpty() || accepted) {
+			// TODO: fix bug, not reseting automaton correctly 
 			System.out.println("Input: " + tape.getInput().substring(tape.getPointer(), tape.getInput().length()));
 			System.out.println("Current state: " + current.getId());
 			System.out.println("Current letter: " + tape.getCurrentCharacterWithoutMove());
@@ -129,7 +131,7 @@ public class PushdownAutomaton {
 
 			System.out.println("Transitions: ");
 			for (Pair i : paths)
-				System.out.println(i.getTransition().toString() + " en la pos " + i.getPosition());
+				System.out.println(i.getTransition().toString());
 
 			System.out.println();
 			System.out.println();
@@ -138,17 +140,26 @@ public class PushdownAutomaton {
 			// Extract pair with current element
 			Pair pair = paths.pop();
 			Transition transition = pair.getTransition();
-
+			
+			System.out.println("Current transition will use: " + transition.toString() + " with position " + pair.getPosition() );
 			// Set pointer correctly in case is wrong
-			if (tape.getPointer() != pair.getPosition()) // Just update if it's different
+			if (tape.getPointer() != pair.getPosition()) {// Just update if it's different
+				System.out.println("Reseting position");
 				tape.setPointer(pair.getPosition());
-
+		}
 			// Compute all the moves
-			if (current.getId() != transition.getNextState().getId()) // Just update if it's different
+			if (current.getId() != transition.getNextState().getId()) {// Just update if it's different
+				System.out.println("Reseting state");
 				current = transition.getNextState(); // Update state
+			}
+			
+			if (pair.getStack()) { // TODO: compare stacks and reset if it's different
+				
+			}
 
 			stack.pop(); // Remove stack top
-			tape.setPointer(tape.getPointer() + 1);
+			if (!transition.getSymbol().equals(EPSILON))  // Tape pointer just move if it's not an epsilon
+				tape.setPointer(tape.getPointer() + 1);
 
 			// Reverse loop for insert correctly in the stack
 			// If we want insert A B S, A must be in the top.
@@ -158,13 +169,17 @@ public class PushdownAutomaton {
 			}
 
 			findTransitions(current, paths);
+			
+			// If stack is empty and the input is all used, it's accepted.
+			if(stack.isEmpty() && tape.getPointer() == tape.getInput().length())
+				accepted = false;
 		}
 
-		if(stack.isEmpty() && tape.getPointer() == tape.getInput().length()) {
+		if(!accepted) 
 			System.out.println(tape.getInput() + " is accepted.");
-		} else {
+		else 
 			System.out.println(tape.getInput() + " is not accepted.");
-		}
+		
 	}
 
 	/**
@@ -181,7 +196,7 @@ public class PushdownAutomaton {
 				if (tape.getCurrentCharacterWithoutMove().equals(i.getSymbol()) || i.getSymbol().equals(EPSILON)) {
 					// If stack top it's equal
 					if (!stack.isEmpty() && stack.peek().equals(i.getStackTop())) {
-						paths.add(new Pair(i, tape.getPointer()));
+						paths.add(new Pair(i, tape.getPointer(), stack));
 					}
 				}
 			}
