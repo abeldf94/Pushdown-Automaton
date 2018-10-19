@@ -5,11 +5,12 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Stack;
 
 import es.ull.etsii.cc.components.Alphabet;
-import es.ull.etsii.cc.components.Pair;
+import es.ull.etsii.cc.components.Save;
 import es.ull.etsii.cc.components.State;
 import es.ull.etsii.cc.components.Tape;
 import es.ull.etsii.cc.components.Transition;
@@ -112,15 +113,14 @@ public class PushdownAutomaton {
 		stack.clear();
 		stack.push(getInitialStackSymbol());
 
-		Stack<Pair> paths = new Stack<>();
+		Stack<Save> paths = new Stack<>();
 
 		findTransitions(current, paths);
 
-		boolean accepted = true;
+		boolean accepted = false;
 		
-		while (!paths.isEmpty() || accepted) {
-			// TODO: fix bug, not reseting automaton correctly 
-			System.out.println("Input: " + tape.getInput().substring(tape.getPointer(), tape.getInput().length()));
+		while (!paths.isEmpty() && !accepted) {
+			/*System.out.println("Input: " + tape.getInput().substring(tape.getPointer(), tape.getInput().length()));
 			System.out.println("Current state: " + current.getId());
 			System.out.println("Current letter: " + tape.getCurrentCharacterWithoutMove());
 			System.out.print("Stack: ");
@@ -130,32 +130,28 @@ public class PushdownAutomaton {
 			System.out.println();
 
 			System.out.println("Transitions: ");
-			for (Pair i : paths)
+			for (Save i : paths)
 				System.out.println(i.getTransition().toString());
 
-			System.out.println();
-			System.out.println();
+			System.out.println();*/
 
 
 			// Extract pair with current element
-			Pair pair = paths.pop();
-			Transition transition = pair.getTransition();
+			Save save = paths.pop();
+			Transition transition = save.getTransition();
 			
-			System.out.println("Current transition will use: " + transition.toString() + " with position " + pair.getPosition() );
 			// Set pointer correctly in case is wrong
-			if (tape.getPointer() != pair.getPosition()) {// Just update if it's different
-				System.out.println("Reseting position");
-				tape.setPointer(pair.getPosition());
-		}
+			if (tape.getPointer() != save.getPosition()) // Just update if it's different
+				tape.setPointer(save.getPosition());
+		
 			// Compute all the moves
-			if (current.getId() != transition.getNextState().getId()) {// Just update if it's different
-				System.out.println("Reseting state");
+			if (!current.getId().equals(transition.getNextState().getId())) // Just update if it's different
 				current = transition.getNextState(); // Update state
-			}
 			
-			if (pair.getStack()) { // TODO: compare stacks and reset if it's different
-				
-			}
+			
+			// Compare stacks and reset if it's different
+			if (!compareStacks(stack, save.getStack())) 
+				stack = save.getStack();				
 
 			stack.pop(); // Remove stack top
 			if (!transition.getSymbol().equals(EPSILON))  // Tape pointer just move if it's not an epsilon
@@ -172,10 +168,10 @@ public class PushdownAutomaton {
 			
 			// If stack is empty and the input is all used, it's accepted.
 			if(stack.isEmpty() && tape.getPointer() == tape.getInput().length())
-				accepted = false;
+				accepted = true;
 		}
 
-		if(!accepted) 
+		if(accepted) 
 			System.out.println(tape.getInput() + " is accepted.");
 		else 
 			System.out.println(tape.getInput() + " is not accepted.");
@@ -188,7 +184,7 @@ public class PushdownAutomaton {
 	 * @param current the current
 	 * @param paths the paths
 	 */
-	private void findTransitions(State current, Stack<Pair> paths) {
+	private void findTransitions(State current, Stack<Save> paths) {
 		for (Transition i : getSetOfTransitions()) {
 			// Check if state is the same, if not we wont keep comparing
 			if (current.getId().equals(i.getCurrentState().getId())) {
@@ -196,12 +192,31 @@ public class PushdownAutomaton {
 				if (tape.getCurrentCharacterWithoutMove().equals(i.getSymbol()) || i.getSymbol().equals(EPSILON)) {
 					// If stack top it's equal
 					if (!stack.isEmpty() && stack.peek().equals(i.getStackTop())) {
-						paths.add(new Pair(i, tape.getPointer(), stack));
+						Stack<String> copy = new Stack<>(); // Copy of stack, so it don't keep a reference
+						copy.addAll(stack);
+						paths.add(new Save(i, tape.getPointer(), copy));
 					}
 				}
 			}
 		}
 	}
+	
+	public Boolean compareStacks (Stack<String> first, Stack<String> second) {
+		if(first == second) return true;
+		if (first.size() != second.size()) return false;
+		if (first.isEmpty() && second.isEmpty()) return true;
+		
+		Iterator<String> firstItr = first.iterator();
+		Iterator<String> secondItr = second.iterator();
+		
+		while(firstItr.hasNext() && secondItr.hasNext()) {
+			if (!firstItr.next().equals(secondItr.next()))
+				return false;
+		}
+		
+		return true;
+	}
+
 
 	/**
 	 * Write automaton to check a correctly load from file.
