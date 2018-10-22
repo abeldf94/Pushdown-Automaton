@@ -15,20 +15,41 @@ import es.ull.etsii.cc.components.State;
 import es.ull.etsii.cc.components.Tape;
 import es.ull.etsii.cc.components.Transition;
 
+/**
+ * Pushdown Automaton simulator.
+ */
 public class PushdownAutomaton {
 
-	private List<State> setOfStates; // Set of states
-	private Alphabet inputAlphabet; // Input alphabet
-	private Alphabet stackAlphabet; // Stack alphabet
-	private State initialState; // Initial state
-	private String initialStackSymbol; // Initial stack symbol
-	private List<Transition> setOfTransitions; // Set of transitions
+	/** The set of states. */
+	private List<State> setOfStates;
+	
+	/** The input alphabet. */
+	private Alphabet inputAlphabet;
+	
+	/** The stack alphabet. */
+	private Alphabet stackAlphabet;
+	
+	/** The initial state. */
+	private State initialState;
+	
+	/** The initial stack symbol. */
+	private String initialStackSymbol;
+	
+	/** The set of transitions. */
+	private List<Transition> setOfTransitions;
 
+	/** The input tape. */
 	private Tape tape;
+	
+	/** The stack. */
 	private Stack<String> stack;
 
+	/** The epsilon. */
 	private final String EPSILON = ".";
 
+	/**
+	 * Instantiates a new pushdown automaton.
+	 */
 	public PushdownAutomaton() {
 		setOfStates = new ArrayList<>();
 		inputAlphabet = new Alphabet();
@@ -40,6 +61,12 @@ public class PushdownAutomaton {
 		stack = new Stack<>();
 	}
 
+	/**
+	 * Load the file content.
+	 *
+	 * @param file the file
+	 * @throws IOException Signals that an I/O exception has occurred.
+	 */
 	public void loadFileContent(String file) throws IOException {
 		BufferedReader reader = new BufferedReader(new FileReader(file));
 
@@ -104,7 +131,12 @@ public class PushdownAutomaton {
 		// writeAutomaton();
 	}
 
-	public void computeInput(String input) {
+	/**
+	 * Compute input to check if it belongs to the language or not.
+	 *
+	 * @param input the input
+	 */
+	public void computeInput(String input, Boolean debug) {
 		// Set new input in tape and reset machine
 		tape.resetTape(input);
 
@@ -115,26 +147,29 @@ public class PushdownAutomaton {
 
 		Stack<Save> paths = new Stack<>();
 
+		// Find the transitions for the input
 		findTransitions(current, paths);
+		
+		if (debug) {
+			System.out.println("Current state: " + current.getId());
+			System.out.println("Input" + tape.getInput().substring(tape.getPointer(), tape.getInput().length()));
+
+			System.out.print("Stack: ");
+			for (String i : stack) {
+				System.out.print(i + " ");
+			}
+			System.out.println();
+			
+			System.out.println("Available transitions: ");
+			for (Save i : paths)
+				System.out.println(i.getTransition().toString());
+			
+			System.out.println();
+		}
 
 		boolean accepted = false;
 		
 		while (!paths.isEmpty() && !accepted) {
-			/*System.out.println("Input: " + tape.getInput().substring(tape.getPointer(), tape.getInput().length()));
-			System.out.println("Current state: " + current.getId());
-			System.out.println("Current letter: " + tape.getCurrentCharacterWithoutMove());
-			System.out.print("Stack: ");
-			for(String i : stack) {
-				System.out.print(i + " ");
-			}
-			System.out.println();
-
-			System.out.println("Transitions: ");
-			for (Save i : paths)
-				System.out.println(i.getTransition().toString());
-
-			System.out.println();*/
-
 
 			// Extract pair with current element
 			Save save = paths.pop();
@@ -166,6 +201,23 @@ public class PushdownAutomaton {
 
 			findTransitions(current, paths);
 			
+			if (debug) {
+				System.out.println("Current state: " + current.getId());
+				System.out.println("Input: " + tape.getInput().substring(tape.getPointer(), tape.getInput().length()));
+
+				System.out.print("Stack: ");
+				for (String i : stack) {
+					System.out.print(i + " ");
+				}
+				System.out.println();
+				
+				System.out.println("Available transitions: ");
+				for (Save i : paths)
+					System.out.println(i.getTransition().toString());
+				
+				System.out.println();
+			}
+			
 			// If stack is empty and the input is all used, it's accepted.
 			if(stack.isEmpty() && tape.getPointer() == tape.getInput().length())
 				accepted = true;
@@ -189,7 +241,7 @@ public class PushdownAutomaton {
 			// Check if state is the same, if not we wont keep comparing
 			if (current.getId().equals(i.getCurrentState().getId())) {
 				// If it's same symbol or epsilon
-				if (tape.getCurrentCharacterWithoutMove().equals(i.getSymbol()) || i.getSymbol().equals(EPSILON)) {
+				if (tape.getCurrentCharacter().equals(i.getSymbol()) || i.getSymbol().equals(EPSILON)) {
 					// If stack top it's equal
 					if (!stack.isEmpty() && stack.peek().equals(i.getStackTop())) {
 						Stack<String> copy = new Stack<>(); // Copy of stack, so it don't keep a reference
@@ -201,14 +253,23 @@ public class PushdownAutomaton {
 		}
 	}
 	
+	/**
+	 * Compare tow stacks to check if they are equal.
+	 *
+	 * @param first the first
+	 * @param second the second
+	 * @return the boolean
+	 */
 	public Boolean compareStacks (Stack<String> first, Stack<String> second) {
-		if(first == second) return true;
-		if (first.size() != second.size()) return false;
-		if (first.isEmpty() && second.isEmpty()) return true;
+		if(first == second) return true; // Check if they point to same object
+		if (first.size() != second.size()) return false; // If size it's different, elements are differents
+		if (first.isEmpty() && second.isEmpty()) return true; // If both are empty, they are equal
 		
+		// Iterators for go throw stacks without pop elements
 		Iterator<String> firstItr = first.iterator();
 		Iterator<String> secondItr = second.iterator();
 		
+		// Compare all the elements
 		while(firstItr.hasNext() && secondItr.hasNext()) {
 			if (!firstItr.next().equals(secondItr.next()))
 				return false;

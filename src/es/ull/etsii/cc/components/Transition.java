@@ -3,12 +3,24 @@ package es.ull.etsii.cc.components;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Transition representation for the automaton.
+ */
 public class Transition {
 
+	/** The current state. */
 	private State currentState;
+	
+	/** The symbol. */
 	private String symbol;
+	
+	/** The stack top element. */
 	private String stackTop;
+	
+	/** The next state. */
 	private State nextState;
+	
+	/** The elements that will be introduced in the stack. */
 	private List<String> elements;
 
 	/**
@@ -17,6 +29,7 @@ public class Transition {
 	 * @param current the current state
 	 * @param symbol the symbol we need for this transition
 	 * @param stackTop symbol that must have the top of the stack for this transition
+	 * @param nextState the next state 
 	 * @param args the the different elements that will be inserted in the stack
 	 */
 	public Transition(State current, String symbol, String stackTop, State nextState, String... args) {
@@ -24,7 +37,7 @@ public class Transition {
 		this.symbol = symbol;
 		this.stackTop = stackTop;
 		this.nextState = nextState;
-		elements = new ArrayList<>();
+		this.elements = new ArrayList<>();
 
 		for (String i : args)
 			elements.add(i);
