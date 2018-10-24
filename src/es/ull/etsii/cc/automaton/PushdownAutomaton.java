@@ -2,7 +2,6 @@ package es.ull.etsii.cc.automaton;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
@@ -65,9 +64,9 @@ public class PushdownAutomaton {
 	 * Load the file content.
 	 *
 	 * @param file the file
-	 * @throws IOException Signals that an I/O exception has occurred.
+	 * @throws Exception 
 	 */
-	public void loadFileContent(String file) throws IOException {
+	public void loadFileContent(String file) throws Exception {
 		BufferedReader reader = new BufferedReader(new FileReader(file));
 
 		String line = reader.readLine();
@@ -110,12 +109,24 @@ public class PushdownAutomaton {
 		tokens = line.split("#")[0].split("\\s+");
 
 		setInitialState(new State(tokens[0]));
+		
+		// Check initial state is correct
+		if (!checkInitialState()) {
+			reader.close();
+			throw new Exception("initial state not belongs to the set of states.");
+		}
 
 		// Read initial stack symbol
 		line = reader.readLine();
 		tokens = line.split("#")[0].split("\\s+");
 
 		setInitialStackSymbol(tokens[0]);
+		
+		// Check initial stack symbol are correctly
+		if (!checkInitialStackSymbol()) {
+			reader.close();
+			throw new Exception("initial stack symbol not belongs to the stack alphabet.");
+		}
 
 		// Read transitions and create it
 		while ((line = reader.readLine()) != null) {
@@ -127,6 +138,11 @@ public class PushdownAutomaton {
 		}
 
 		reader.close();
+		
+		// Check transitions are correctly
+		if (!checkTransitions()) {
+			throw new Exception("transitions are incorrectly.");
+		}
 
 		// writeAutomaton();
 	}
@@ -139,7 +155,7 @@ public class PushdownAutomaton {
 	public void computeInput(String input, Boolean debug) {
 		// Set new input in tape and reset machine
 		tape.resetTape(input);
-
+		
 		State current = getInitialState();
 
 		stack.clear();
@@ -278,6 +294,97 @@ public class PushdownAutomaton {
 		return true;
 	}
 
+	/**
+	 * Check initial state.
+	 *
+	 * @return the boolean
+	 */
+	public Boolean checkInitialState() {
+		for(State i : setOfStates) {
+			if (i.getId().equals(initialState.getId()))
+				return true;
+		}
+		return false;
+	}
+	
+	/**
+	 * Check initial stack symbol.
+	 *
+	 * @return the boolean
+	 */
+	public Boolean checkInitialStackSymbol() {
+		for(String i : stackAlphabet.getElements()) {
+			if (i.equals(initialStackSymbol))
+				return true;
+		}
+		return false;
+	}
+	
+	/**
+	 * Check transition state.
+	 *
+	 * @param state the state
+	 * @return the boolean
+	 */
+	public Boolean checkState(State state) {
+		for(State i : setOfStates) {
+			if (i.getId().equals(state.getId()))
+				return true;
+		}		
+		return false;
+	}
+	
+	/**
+	 * Check element belongs to stack alphabet.
+	 *
+	 * @param element the element
+	 * @return the boolean
+	 */
+	public Boolean checkStackAlphabet(String element) {
+		for(String i : stackAlphabet.getElements()) {
+			if (i.equals(element))
+				return true;
+		}		
+		return false;
+	}
+	
+	/**
+	 * Check symbol belongs input alphabet.
+	 *
+	 * @param element the element
+	 * @return the boolean
+	 */
+	public Boolean checkSymbol(String element) {
+		for(String i : inputAlphabet.getElements()) {
+			if (i.equals(element))
+				return true;
+		}		
+		return false;
+	}
+	
+	
+	/**
+	 * Check all the transitions.
+	 *
+	 * @return the boolean
+	 */
+	public Boolean checkTransitions() {
+		for(Transition i : setOfTransitions) {
+			if (!checkState(i.getCurrentState()))
+				return false;
+			else if (!checkState(i.getNextState()))
+				return false;
+			else if (!checkStackAlphabet(i.getStackTop()))
+				return false;
+			else if (!checkSymbol(i.getSymbol())) 
+				return false;
+			else if (!i.getElements().get(0).equals(".")) {
+				if (!stackAlphabet.getElements().containsAll(i.getElements())) 
+					return false;
+			}
+		}
+		return true;
+	}
 
 	/**
 	 * Write automaton to check a correctly load from file.
