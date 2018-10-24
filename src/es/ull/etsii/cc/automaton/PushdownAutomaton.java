@@ -376,9 +376,10 @@ public class PushdownAutomaton {
 				return false;
 			else if (!checkStackAlphabet(i.getStackTop()))
 				return false;
-			else if (!checkSymbol(i.getSymbol())) 
-				return false;
-			else if (!i.getElements().get(0).equals(".")) {
+			else if (!i.getSymbol().equals(".")) {
+				if (!checkSymbol(i.getSymbol())) 
+					return false;
+			} else if (!i.getElements().get(0).equals(".")) {
 				if (!stackAlphabet.getElements().containsAll(i.getElements())) 
 					return false;
 			}
