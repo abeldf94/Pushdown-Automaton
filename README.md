@@ -19,9 +19,14 @@
 
 * In this simulation, we won't implement a final state PDA. It will accept the input if the stack is empty and input consumed.
 
+#### How to use it:
+* Program can receive two arguments. It need a file that contains the machine and also can receive debug as optional parameter.
+	- file.txt [debug]
+* The file structure it's defined by the pdf guide that it's available in this repository.
+
 #### Examples tested:
 
-* APv.txt 
+* APv.txt
 	- L = {a^nb^n | n > 0}
 * APv-2.txt
-	- L = {w | wE{0,1}* and w = reversed w} 
+	- L = {w | wE{0,1}* and w = reversed w}
