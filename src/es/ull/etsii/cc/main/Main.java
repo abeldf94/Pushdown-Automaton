@@ -17,6 +17,10 @@ public class Main {
 	 */
 	public static void main(String[] args) {
 		try {
+			if (args.length > 2 || args.length == 0) {
+				throw new Exception("incorrect program arguments. Usage: file.txt [debug]");
+			}
+			
 			// Automaton
 			PushdownAutomaton myAutomaton = new PushdownAutomaton();
 			myAutomaton.loadFileContent(args[0]);

@@ -168,7 +168,7 @@ public class PushdownAutomaton {
 		
 		if (debug) {
 			System.out.println("Current state: " + current.getId());
-			System.out.println("Input" + tape.getInput().substring(tape.getPointer(), tape.getInput().length()));
+			System.out.println("Input: " + tape.getInput().substring(tape.getPointer(), tape.getInput().length()));
 
 			System.out.print("Stack: ");
 			for (String i : stack) {
@@ -177,8 +177,11 @@ public class PushdownAutomaton {
 			System.out.println();
 			
 			System.out.println("Available transitions: ");
-			for (Save i : paths)
-				System.out.println(i.getTransition().toString());
+			Integer position = paths.size();
+			for (Save i : paths) {
+				System.out.println(position + ": " +i.getTransition().toString());
+				position--;
+			}
 			
 			System.out.println();
 		}
@@ -228,8 +231,11 @@ public class PushdownAutomaton {
 				System.out.println();
 				
 				System.out.println("Available transitions: ");
-				for (Save i : paths)
-					System.out.println(i.getTransition().toString());
+				Integer position = paths.size();
+				for (Save i : paths) {
+					System.out.println(position + ": " +i.getTransition().toString());
+					position--;
+				}
 				
 				System.out.println();
 			}
